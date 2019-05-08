@@ -44,7 +44,7 @@ public class CategoryView extends LinearLayout {
             CategoryDo item = new CategoryDo();
             item.setC_id("cid_"+i);
             item.setC_title("Title "+i);
-            item.setC_auth("Auth "+i);
+            item.setC_singer("Auth "+i);
             temp.add(item);
         }
         return temp;
@@ -53,7 +53,20 @@ public class CategoryView extends LinearLayout {
     public void setViewData(String title, String des){
         category_title.setText(title);
         category_description.setText(des);
-        adapter = new CategoryAdapter(tempList());
+        adapter = new CategoryAdapter(tempList(), context);
+        adapter.setOnClickViewListener(new CategoryAdapter.onClickViewListener() {
+            @Override
+            public void onClicked(View view, CategoryDo item) {
+                Toast.makeText(context, "Click : " + item.getC_id(), Toast.LENGTH_SHORT).show();
+            }
+        });
+        recyclerView.setAdapter(adapter);
+    }
+
+    public void setViewData(String title, String des, ArrayList<CategoryDo> list){
+        category_title.setText(title);
+        category_description.setText(des);
+        adapter = new CategoryAdapter(list, context);
         adapter.setOnClickViewListener(new CategoryAdapter.onClickViewListener() {
             @Override
             public void onClicked(View view, CategoryDo item) {

@@ -3,6 +3,7 @@
     package="com.hch.hooney.musiccloudproject">
 
     <application
+        android:name=".Applicatoin.MyApp"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"

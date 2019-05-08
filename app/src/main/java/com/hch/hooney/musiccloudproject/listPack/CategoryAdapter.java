@@ -1,5 +1,6 @@
 package com.hch.hooney.musiccloudproject.listPack;
 
+import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -8,16 +9,19 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.hch.hooney.musiccloudproject.Do.CategoryDo;
 import com.hch.hooney.musiccloudproject.R;
 
 import java.util.ArrayList;
 
 public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.CategoryHolder>{
+    private Context context;
     private ArrayList<CategoryDo> list;
     private onClickViewListener listener;
 
-    public CategoryAdapter(ArrayList<CategoryDo> list) {
+    public CategoryAdapter(ArrayList<CategoryDo> list, Context context) {
+        this.context = context;
         this.list = list;
     }
 
@@ -32,7 +36,11 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.Catego
     public void onBindViewHolder(@NonNull CategoryHolder holder, int position) {
         CategoryDo item = list.get(position);
         holder.music_title.setText(item.getC_title());
-        holder.music_auth.setText(item.getC_auth());
+        holder.music_auth.setText(item.getC_singer());
+        Glide.with(context)
+                .load(item.getC_image_url())
+                .centerCrop()
+                .into(holder.music_image);
     }
 
     @Override

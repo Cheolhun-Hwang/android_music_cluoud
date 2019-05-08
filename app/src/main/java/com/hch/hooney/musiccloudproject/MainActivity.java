@@ -7,12 +7,16 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.MenuItem;
 
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.hch.hooney.musiccloudproject.fragments.HomeFragment;
 import com.hch.hooney.musiccloudproject.fragments.SearchFragment;
 import com.hch.hooney.musiccloudproject.fragments.UserFragment;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
+    public static FirebaseDatabase database = FirebaseDatabase.getInstance();
+    public static DatabaseReference rootRef = database.getReference("MusicCloud");
 
     private enum Tabs{
         홈, 검색, 유저
