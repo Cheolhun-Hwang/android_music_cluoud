@@ -21,6 +21,15 @@ public class CategoryView extends LinearLayout {
     private TextView category_description;
     private RecyclerView recyclerView;
     private CategoryAdapter adapter;
+    private OnClickListItemListener listener;
+
+    public void setOnClickListItemListener(final OnClickListItemListener listItemListener){
+        this.listener = listItemListener;
+    }
+
+    public interface OnClickListItemListener{
+        void onItemSelected(View view, CategoryDo item);
+    }
 
     public CategoryView(Context context) {
         super(context);
@@ -70,7 +79,9 @@ public class CategoryView extends LinearLayout {
         adapter.setOnClickViewListener(new CategoryAdapter.onClickViewListener() {
             @Override
             public void onClicked(View view, CategoryDo item) {
-                Toast.makeText(context, "Click : " + item.getC_id(), Toast.LENGTH_SHORT).show();
+                if(listener != null){
+                    listener.onItemSelected(view, item);
+                }
             }
         });
         recyclerView.setAdapter(adapter);

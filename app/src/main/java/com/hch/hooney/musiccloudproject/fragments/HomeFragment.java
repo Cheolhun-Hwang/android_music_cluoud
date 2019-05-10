@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CalendarView;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -29,7 +30,15 @@ import java.util.Map;
 public class HomeFragment extends Fragment {
     private final static String TAG = HomeFragment.class.getSimpleName();
     private LinearLayout main_parent;
+    private OnItemClickListener listener;
 
+    public void setOnItenClickListner(OnItemClickListener listner){
+        this.listener = listner;
+    }
+
+    public interface OnItemClickListener{
+        void onItemClick(View view, CategoryDo item);
+    }
 
     public HomeFragment() {
         // Required empty public constructor
@@ -63,6 +72,14 @@ public class HomeFragment extends Fragment {
                 }
 
                 CategoryView view1 = new CategoryView(getContext());
+                view1.setOnClickListItemListener(new CategoryView.OnClickListItemListener() {
+                    @Override
+                    public void onItemSelected(View view, CategoryDo item) {
+                        if(listener!=null){
+                            listener.onItemClick(view, item);
+                        }
+                    }
+                });
                 view1.setViewData("Chill", "Popular playlists from the SoundCloud.", list);
                 main_parent.addView(view1);
             }
