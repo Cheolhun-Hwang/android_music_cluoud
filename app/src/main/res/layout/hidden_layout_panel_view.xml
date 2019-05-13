@@ -2,7 +2,9 @@
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/background">
+
     <ImageView
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
@@ -10,4 +12,81 @@
         android:scaleType="centerCrop"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
+
+    <LinearLayout
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <LinearLayout
+            android:padding="8dp"
+            android:orientation="vertical"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="match_parent">
+            <TextView
+                android:id="@+id/hidden_layout_panel_singer"
+                android:textSize="20sp"
+                android:background="@color/black"
+                android:textColor="@color/grey_300"
+                android:text="Singer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+            <TextView
+                android:id="@+id/hidden_layout_panel_title"
+                android:textSize="24sp"
+                android:background="@color/black"
+                android:textStyle="bold"
+                android:textColor="@color/white"
+                android:text="Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+        <ImageButton
+            android:id="@+id/hidden_layout_panel_down_btn"
+            android:src="@drawable/ic_expand_more"
+            android:background="@color/alpha"
+            android:layout_weight="0.25"
+            android:layout_width="0dp"
+            android:layout_height="match_parent" />
+    </LinearLayout>
+
+    <android.support.v7.widget.AppCompatSeekBar
+        android:id="@+id/hidden_layout_panel_seek_bar"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginBottom="80dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <LinearLayout
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:background="@color/black"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="48dp">
+        <ImageButton
+            android:background="@color/alpha"
+            android:src="@drawable/ic_list"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="match_parent" />
+        <ImageButton
+            android:background="@color/alpha"
+            android:src="@drawable/ic_insert_comment"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="match_parent" />
+        <ImageButton
+            android:background="@color/alpha"
+            android:src="@drawable/ic_more_vert"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="match_parent" />
+    </LinearLayout>
 </RelativeLayout>
