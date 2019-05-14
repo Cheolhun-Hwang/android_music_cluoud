@@ -42,6 +42,8 @@ public class MainActivity extends AppCompatActivity {
     private DownPanelView2 downPanelView2;
     private HiddenPanelView2 hiddenPanelView2;
 
+    private boolean isMusicPlay;
+
     private AudioServiceBinder binder;
     private ServiceConnection connection = new ServiceConnection() {
         @Override
@@ -70,7 +72,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        setBar(getSupportActionBar());
         init();
     }
 
@@ -100,6 +101,7 @@ public class MainActivity extends AppCompatActivity {
     private void init() {
         bindMusicService();
 
+        isMusicPlay = false;
         nowTab = Tabs.홈;
         tabView = findViewById(R.id.main_tabs);
 
@@ -109,10 +111,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClicked(ImageButton button, boolean isPlay, String url) {
                 Toast.makeText(MainActivity.this, "isPlay : " + isPlay, Toast.LENGTH_SHORT).show();
+                isMusicPlay = isPlay;
                 if(isPlay){
-                    binder.setMusicContext(getApplicationContext());
-                    binder.setAudioUrl(url);
-                    binder.startMusic();
+                    binder.setMediaPlayer(getApplicationContext(), url);
                     button.setImageDrawable(getResources().getDrawable(R.drawable.ic_pause, null));
                 }else{
                     binder.pauseMusic();
@@ -133,11 +134,16 @@ public class MainActivity extends AppCompatActivity {
             public void onPanelSlide(View panel, float slideOffset) {
                 hiddenPanelView2.setAlpha(slideOffset);
                 downPanelView2.setAlpha(1-slideOffset);
+                tabView.setAlpha(1-slideOffset);
             }
 
             @Override
             public void onPanelStateChanged(View panel, SlidingUpPanelLayout.PanelState previousState, SlidingUpPanelLayout.PanelState newState) {
-
+                if(newState == SlidingUpPanelLayout.PanelState.EXPANDED){
+                    tabView.setVisibility(View.GONE);
+                }else if(newState == SlidingUpPanelLayout.PanelState.COLLAPSED){
+                    tabView.setVisibility(View.VISIBLE);
+                }
             }
         });
 
@@ -150,6 +156,10 @@ public class MainActivity extends AppCompatActivity {
                 downPanelView2.setViewData(item.getC_title(), item.getC_singer(), item.getC_url());
                 hiddenPanelView2.setViewData(item.getC_title(), item.getC_singer(), item.getC_image_url());
                 upPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+
+                if(isMusicPlay){
+                    binder.setMediaPlayer(getApplicationContext(), item.getC_url());
+                }
             }
         });
         search = new SearchFragment();
@@ -199,9 +209,5 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-    }
-
-    private void setBar(ActionBar supportActionBar) {
-        supportActionBar.setTitle("Home");
     }
 }

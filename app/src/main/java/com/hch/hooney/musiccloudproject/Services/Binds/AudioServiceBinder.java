@@ -1,10 +1,13 @@
 package com.hch.hooney.musiccloudproject.Services.Binds;
 
 import android.content.Context;
+import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Handler;
+import android.util.Log;
 
 import java.io.IOException;
 
@@ -21,16 +24,16 @@ public class AudioServiceBinder extends Binder implements MediaPlayer.OnPrepared
         return context;
     }
 
-    public void setMusicContext(Context context) {
-        this.context = context;
-    }
-
     public String getAudioUrl() {
         return audioUrl;
     }
 
-    public void setAudioUrl(String audioUrl) {
-        this.audioUrl = audioUrl;
+    public int getDuration(){
+        return mediaPlayer.getDuration();
+    }
+
+    public void setDuration(int duration){
+        mediaPlayer.seekTo(duration);
     }
 
     public Handler getProgressUpdateHandler() {
@@ -42,19 +45,44 @@ public class AudioServiceBinder extends Binder implements MediaPlayer.OnPrepared
     }
 
     private void initMediaPlayer(){
-        if (mediaPlayer == null) {
+        if (this.mediaPlayer == null) {
             mediaPlayer = new MediaPlayer();
-            mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC); // Deprecated
-        } //Audio Streaming > Firebase
+            mediaPlayer.setOnPreparedListener(this);
+            if(Build.VERSION.SDK_INT >= 21){
+                mediaPlayer.setAudioAttributes(new AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_MEDIA)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                    .build());
+            }else{
+                mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+            }
+        }
     }
 
-    public void startMusic(){
-        if(this.mediaPlayer == null){
-            initMediaPlayer();
+    public void setMediaPlayer(Context context, String url){
+        this.context = context;
+        if(!url.trim().isEmpty()){
+            if(this.audioUrl == null){
+                //첫 재생
+                this.audioUrl = url;
+                initMediaPlayer();
+                startMusic(url);
+            }else{
+                if(this.audioUrl.equals(url)){
+                    //지속 재생
+                }else{
+                    //삭제 다시 재생
+                    destroyMusic();
+                    initMediaPlayer();
+                    startMusic(url);
+                }
+            }
         }
+    }
+
+    public void startMusic(String url){
         try{
-            mediaPlayer.setDataSource(this.audioUrl);
-            mediaPlayer.setOnPreparedListener(this);
+            mediaPlayer.setDataSource(url);
             mediaPlayer.prepareAsync();
         } catch (IOException e) {
             e.printStackTrace();
@@ -80,7 +108,7 @@ public class AudioServiceBinder extends Binder implements MediaPlayer.OnPrepared
                 this.mediaPlayer.stop();
             }
             this.mediaPlayer.release();
-//            this.mediaPlayer = null;
+            this.mediaPlayer = null;
         }
     }
 
