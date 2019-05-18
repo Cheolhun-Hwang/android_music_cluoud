@@ -45,7 +45,7 @@ public class AudioServiceBinder extends Binder implements MediaPlayer.OnPrepared
     }
 
     private void initMediaPlayer(){
-        if (this.mediaPlayer == null) {
+        if(this.mediaPlayer == null){
             mediaPlayer = new MediaPlayer();
             mediaPlayer.setOnPreparedListener(this);
             if(Build.VERSION.SDK_INT >= 21){
@@ -63,16 +63,17 @@ public class AudioServiceBinder extends Binder implements MediaPlayer.OnPrepared
         this.context = context;
         if(!url.trim().isEmpty()){
             if(this.audioUrl == null){
-                //첫 재생
+                //첫 재생 시
                 this.audioUrl = url;
                 initMediaPlayer();
                 startMusic(url);
             }else{
+                //이전 곡에 대한 정보가 있을 시
                 if(this.audioUrl.equals(url)){
-                    //지속 재생
+                    //재생하고 있는 곡
                 }else{
-                    //삭제 다시 재생
                     destroyMusic();
+                    this.audioUrl = url;
                     initMediaPlayer();
                     startMusic(url);
                 }
@@ -80,7 +81,7 @@ public class AudioServiceBinder extends Binder implements MediaPlayer.OnPrepared
         }
     }
 
-    public void startMusic(String url){
+    private void startMusic(String url) {
         try{
             mediaPlayer.setDataSource(url);
             mediaPlayer.prepareAsync();

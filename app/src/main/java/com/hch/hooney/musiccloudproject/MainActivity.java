@@ -7,14 +7,11 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
@@ -26,9 +23,7 @@ import com.hch.hooney.musiccloudproject.Services.MusicService;
 import com.hch.hooney.musiccloudproject.fragments.HomeFragment;
 import com.hch.hooney.musiccloudproject.fragments.SearchFragment;
 import com.hch.hooney.musiccloudproject.fragments.UserFragment;
-import com.hch.hooney.musiccloudproject.views.DownPanelView;
 import com.hch.hooney.musiccloudproject.views.DownPanelView2;
-import com.hch.hooney.musiccloudproject.views.HiddenPanelView;
 import com.hch.hooney.musiccloudproject.views.HiddenPanelView2;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
@@ -123,6 +118,12 @@ public class MainActivity extends AppCompatActivity {
         });
 
         hiddenPanelView2 = new HiddenPanelView2(getApplicationContext());
+        hiddenPanelView2.setOnTalkButtonClickListener(new HiddenPanelView2.OnTalkButtonClickListener() {
+            @Override
+            public void onClick(ImageButton talkBtn) {
+                startActivity(new Intent(getApplicationContext(), TalkActivity.class));
+            }
+        });
 
         panelLayout.addView(downPanelView2);
         panelLayout.addView(hiddenPanelView2);

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.support.v7.widget.AppCompatSeekBar;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -14,8 +15,20 @@ import com.hch.hooney.musiccloudproject.R;
 public class HiddenPanelView2 extends LinearLayout {
     private static final String TAG = HiddenPanelView2.class.getSimpleName();
     private ImageView mainImage, downBtn;
+    private ImageButton  musicListBtn, talkBtn, menuBtn;
     private TextView music_title, music_singer;
     private AppCompatSeekBar seekbar;
+
+
+    private OnTalkButtonClickListener listener;
+
+    public void setOnTalkButtonClickListener(OnTalkButtonClickListener listener){
+        this.listener = listener;
+    }
+
+    public interface OnTalkButtonClickListener{
+        void onClick(ImageButton talkBtn);
+    }
 
 
     public HiddenPanelView2(Context context) {
@@ -31,7 +44,22 @@ public class HiddenPanelView2 extends LinearLayout {
         music_singer = view.findViewById(R.id.hidden_layout_panel_singer);
         seekbar = view.findViewById(R.id.hidden_layout_panel_seek_bar);
         downBtn = view.findViewById(R.id.hidden_layout_panel_down_btn);
+        musicListBtn = view.findViewById(R.id.hidden_layout_panel_music_list);
+        talkBtn = view.findViewById(R.id.hidden_layout_panel_talk);
+        menuBtn = view.findViewById(R.id.hidden_layout_panel_menu);
         addView(view);
+        setEvents();
+    }
+
+    private void setEvents() {
+        talkBtn.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(listener != null){
+                    listener.onClick(talkBtn);
+                }
+            }
+        });
     }
 
     public void setViewData(String url){
