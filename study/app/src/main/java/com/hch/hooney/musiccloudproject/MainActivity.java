@@ -4,7 +4,9 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AppCompatActivity;
@@ -13,6 +15,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
+import android.widget.SeekBar;
 import android.widget.Toast;
 
 import com.google.firebase.database.DatabaseReference;
@@ -23,8 +26,8 @@ import com.hch.hooney.musiccloudproject.Services.MusicService;
 import com.hch.hooney.musiccloudproject.fragments.HomeFragment;
 import com.hch.hooney.musiccloudproject.fragments.SearchFragment;
 import com.hch.hooney.musiccloudproject.fragments.UserFragment;
-import com.hch.hooney.musiccloudproject.views.DownPanelView2;
-import com.hch.hooney.musiccloudproject.views.HiddenPanelView2;
+import com.hch.hooney.musiccloudproject.views.DownPanelView;
+import com.hch.hooney.musiccloudproject.views.HiddenPanelView;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 public class MainActivity extends AppCompatActivity {
@@ -34,8 +37,8 @@ public class MainActivity extends AppCompatActivity {
 
     private SlidingUpPanelLayout upPanelLayout;
     private RelativeLayout panelLayout;
-    private DownPanelView2 downPanelView2;
-    private HiddenPanelView2 hiddenPanelView2;
+    private DownPanelView downPanelView;
+    private HiddenPanelView hiddenPanelView;
 
     private boolean isMusicPlay;
 
@@ -51,6 +54,7 @@ public class MainActivity extends AppCompatActivity {
 
         }
     };
+    private Handler audioProgressHandler;
 
     private enum Tabs{
         홈, 검색, 유저
@@ -95,74 +99,17 @@ public class MainActivity extends AppCompatActivity {
 
     private void init() {
         bindMusicService();
-
         isMusicPlay = false;
         nowTab = Tabs.홈;
         tabView = findViewById(R.id.main_tabs);
-
         panelLayout = findViewById(R.id.main_panel_layout);
-        downPanelView2 = new DownPanelView2(getApplicationContext());
-        downPanelView2.setOnPlayButtonClickListener(new DownPanelView2.OnPlayButtonClickListener() {
-            @Override
-            public void onClicked(ImageButton button, boolean isPlay, String url) {
-                Toast.makeText(MainActivity.this, "isPlay : " + isPlay, Toast.LENGTH_SHORT).show();
-                isMusicPlay = isPlay;
-                if(isPlay){
-                    binder.setMediaPlayer(getApplicationContext(), url);
-                    button.setImageDrawable(getResources().getDrawable(R.drawable.ic_pause, null));
-                }else{
-                    binder.pauseMusic();
-                    button.setImageDrawable(getResources().getDrawable(R.drawable.ic_play_arrow, null));
-                }
-            }
-        });
-
-        hiddenPanelView2 = new HiddenPanelView2(getApplicationContext());
-        hiddenPanelView2.setOnTalkButtonClickListener(new HiddenPanelView2.OnTalkButtonClickListener() {
-            @Override
-            public void onClick(ImageButton talkBtn) {
-                startActivity(new Intent(getApplicationContext(), TalkActivity.class));
-            }
-        });
-
-        panelLayout.addView(downPanelView2);
-        panelLayout.addView(hiddenPanelView2);
-
+        downPanelView = new DownPanelView(getApplicationContext());
+        hiddenPanelView = new HiddenPanelView(getApplicationContext());
+        panelLayout.addView(downPanelView);
+        panelLayout.addView(hiddenPanelView);
         upPanelLayout = findViewById(R.id.main_up_panel);
         upPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.HIDDEN);
-        upPanelLayout.addPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
-            @Override
-            public void onPanelSlide(View panel, float slideOffset) {
-                hiddenPanelView2.setAlpha(slideOffset);
-                downPanelView2.setAlpha(1-slideOffset);
-                tabView.setAlpha(1-slideOffset);
-            }
-
-            @Override
-            public void onPanelStateChanged(View panel, SlidingUpPanelLayout.PanelState previousState, SlidingUpPanelLayout.PanelState newState) {
-                if(newState == SlidingUpPanelLayout.PanelState.EXPANDED){
-                    tabView.setVisibility(View.GONE);
-                }else if(newState == SlidingUpPanelLayout.PanelState.COLLAPSED){
-                    tabView.setVisibility(View.VISIBLE);
-                }
-            }
-        });
-
-
         home = new HomeFragment();
-        home.setOnItenClickListner(new HomeFragment.OnItemClickListener() {
-            @Override
-            public void onItemClick(View view, CategoryDo item) {
-                Toast.makeText(MainActivity.this, "item : " + item.getC_title(), Toast.LENGTH_SHORT).show();
-                downPanelView2.setViewData(item.getC_title(), item.getC_singer(), item.getC_url());
-                hiddenPanelView2.setViewData(item.getC_title(), item.getC_singer(), item.getC_image_url());
-                upPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
-
-                if(isMusicPlay){
-                    binder.setMediaPlayer(getApplicationContext(), item.getC_url());
-                }
-            }
-        });
         search = new SearchFragment();
         user = new UserFragment();
 
@@ -178,6 +125,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void unBindMusicService(){
         if(this.binder != null){
+            binder.destroyThread();
             unbindService(connection);
         }
     }
@@ -210,5 +158,107 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+        downPanelView.setOnPlayButtonClickListener(new DownPanelView.OnPlayButtonClickListener() {
+            @Override
+            public void onClicked(ImageButton button, boolean isPlay, String url) {
+                Toast.makeText(MainActivity.this, "isPlay : " + isPlay, Toast.LENGTH_SHORT).show();
+                isMusicPlay = isPlay;
+                if(isPlay){
+                    startMusic(url);
+                }else{
+                    binder.pauseMusic();
+                }
+            }
+        });
+        hiddenPanelView.setOnTalkButtonClickListener(new HiddenPanelView.OnTalkButtonClickListener() {
+            @Override
+            public void onClick(ImageButton talkBtn, SeekBar seekBar, CategoryDo item) {
+                Intent intent = new Intent(getApplicationContext(), TalkActivity.class);
+                intent.putExtra("progress", convertDurationToText(seekBar.getProgress()));
+                intent.putExtra("m_id", item.getC_id());
+                startActivity(intent);
+            }
+        });
+        hiddenPanelView.setOnSeekbarClickListener(new HiddenPanelView.OnSeekbarClickListener() {
+            @Override
+            public void progress(SeekBar seekBar, int progress, boolean fromUser) {
+                if(fromUser){
+                    binder.setDuration(progress);
+                }
+            }
+        });
+        upPanelLayout.addPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
+            @Override
+            public void onPanelSlide(View panel, float slideOffset) {
+                hiddenPanelView.setAlpha(slideOffset);
+                downPanelView.setAlpha(1-slideOffset);
+                tabView.setAlpha(1-slideOffset);
+            }
+
+            @Override
+            public void onPanelStateChanged(View panel, SlidingUpPanelLayout.PanelState previousState, SlidingUpPanelLayout.PanelState newState) {
+                if(newState == SlidingUpPanelLayout.PanelState.EXPANDED){
+                    tabView.setVisibility(View.GONE);
+                }else if(newState == SlidingUpPanelLayout.PanelState.COLLAPSED){
+                    tabView.setVisibility(View.VISIBLE);
+                }
+            }
+        });
+        home.setOnItenClickListner(new HomeFragment.OnItemClickListener() {
+            @Override
+            public void onItemClick(View view, CategoryDo item) {
+                Toast.makeText(MainActivity.this, "item : " + item.getC_title(), Toast.LENGTH_SHORT).show();
+                downPanelView.setViewData(item.getC_title(), item.getC_singer(), item.getC_url());
+                hiddenPanelView.setMusic(item);
+                hiddenPanelView.setViewData(item.getC_title(), item.getC_singer(), item.getC_image_url());
+                upPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+
+                if(isMusicPlay){
+                    startMusic(item.getC_url());
+                }
+            }
+        });
+    }
+
+    private String convertDurationToText(int progress) {
+        int min = (progress / 60000) % 60000;
+        int sec = (progress % 60000) / 1000;
+        String musicTime = String.format("%02d:%02d", min, sec);
+        return musicTime;
+    }
+
+    private void startMusic(String url) {
+        createProgressHandler();
+        binder.setProgressUpdateHandler(audioProgressHandler);
+        binder.setMediaPlayer(getApplicationContext(), url);
+    }
+
+    private void createProgressHandler() {
+        if(audioProgressHandler == null){
+            audioProgressHandler = new Handler(new Handler.Callback() {
+                @Override
+                public boolean handleMessage(Message msg) {
+                    switch (msg.what){
+                        case AudioServiceBinder.UPDATE_AUDIO_PROGRESS:
+                            if(binder != null){
+                                int currentProgress = binder.getProgress();
+                                int maxDuration = binder.getDuration();
+                                hiddenPanelView.setMaxDuration(maxDuration);
+                                hiddenPanelView.setSeekProgress(currentProgress);
+                            }
+                            return true;
+                        case AudioServiceBinder.PLAY_AUDIO:
+                            if((boolean)msg.obj){
+                                downPanelView.getPlayBtn().setImageDrawable(getResources().getDrawable(R.drawable.ic_pause, null));
+                            }else{
+                                downPanelView.getPlayBtn().setImageDrawable(getResources().getDrawable(R.drawable.ic_play_arrow, null));
+                            }
+                            return true;
+                        default:
+                            return false;
+                    }
+                }
+            });
+        }
     }
 }

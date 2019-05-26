@@ -1,5 +1,7 @@
 package com.hch.hooney.musiccloudproject.listPack;
 
+import android.graphics.drawable.ShapeDrawable;
+import android.graphics.drawable.shapes.OvalShape;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -8,31 +10,31 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.hch.hooney.musiccloudproject.Do.TalKData;
+import com.hch.hooney.musiccloudproject.Do.TalkData;
 import com.hch.hooney.musiccloudproject.R;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class TalkListAdapter extends RecyclerView.Adapter<TalkListAdapter.TalkListHolder>{
-    private List<TalKData> list;
+    private List<TalkData> list;
 
     public TalkListAdapter() {
         this.list = new ArrayList<>();
     }
 
-    public TalkListAdapter(List<TalKData> list) {
+    public TalkListAdapter(List<TalkData> list) {
         this.list = list;
     }
 
-    public void setList(ArrayList<TalKData> list) {
-        list.clear();
-        list.addAll(list);
+    public void setList(ArrayList<TalkData> list) {
+        this.list.clear();
+        this.list.addAll(list);
         notifyDataSetChanged();
     }
 
-    public void addList(TalKData... list){
-        for(TalKData item : list){
+    public void addList(TalkData... list){
+        for(TalkData item : list){
             this.list.add(item);
         }
         notifyDataSetChanged();
@@ -63,6 +65,8 @@ public class TalkListAdapter extends RecyclerView.Adapter<TalkListAdapter.TalkLi
         public TalkListHolder(@NonNull View itemView) {
             super(itemView);
             userIcon = itemView.findViewById(R.id.item_talk_icon);
+            userIcon.setBackground(new ShapeDrawable(new OvalShape()));
+            userIcon.setClipToOutline(true);
             userMsg = itemView.findViewById(R.id.item_talk_msg);
             talkInfo = itemView.findViewById(R.id.item_talk_info);
         }
