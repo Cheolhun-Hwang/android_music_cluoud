@@ -7,6 +7,7 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
@@ -17,19 +18,27 @@ public class HiddenPanelView extends LinearLayout {
     private ImageView mainImage, downBtn;
     private ImageButton  musicListBtn, talkBtn, menuBtn;
     private TextView music_title, music_singer;
-    private AppCompatSeekBar seekbar;
+    private SeekBar seekbar;
 
 
     private OnTalkButtonClickListener listener;
+    private OnSeekBarClickListener seekListener;
 
     public void setOnTalkButtonClickListener(OnTalkButtonClickListener listener){
         this.listener = listener;
     }
 
     public interface OnTalkButtonClickListener{
-        void onClick(ImageButton talkBtn);
+        void onClick(ImageButton talkBtn, SeekBar seekBar);
     }
 
+    public void setOnSeekBarClickListenr(OnSeekBarClickListener listener){
+        this.seekListener = listener;
+    }
+
+    public interface OnSeekBarClickListener{
+        void onProgress(SeekBar seekBar, int progress, boolean fromUser);
+    }
 
     public HiddenPanelView(Context context) {
         super(context);
@@ -43,6 +52,24 @@ public class HiddenPanelView extends LinearLayout {
         music_title = view.findViewById(R.id.hidden_layout_panel_title);
         music_singer = view.findViewById(R.id.hidden_layout_panel_singer);
         seekbar = view.findViewById(R.id.hidden_layout_panel_seek_bar);
+        seekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if(seekListener != null){
+                    seekListener.onProgress(seekBar, progress, fromUser);
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
         downBtn = view.findViewById(R.id.hidden_layout_panel_down_btn);
         musicListBtn = view.findViewById(R.id.hidden_layout_panel_music_list);
         talkBtn = view.findViewById(R.id.hidden_layout_panel_talk);
@@ -56,7 +83,7 @@ public class HiddenPanelView extends LinearLayout {
             @Override
             public void onClick(View v) {
                 if(listener != null){
-                    listener.onClick(talkBtn);
+                    listener.onClick(talkBtn, seekbar);
                 }
             }
         });
@@ -76,6 +103,12 @@ public class HiddenPanelView extends LinearLayout {
                 .load(url)
                 .centerCrop()
                 .into(mainImage);
+    }
+
+    public void setMaxDuration(int max){
+        if(seekbar.getMax() != max){
+            seekbar.setMax(max);
+        }
     }
 
     public void setSeekProgress(int progress){

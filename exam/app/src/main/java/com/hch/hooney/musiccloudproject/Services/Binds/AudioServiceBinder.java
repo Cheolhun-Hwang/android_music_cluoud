@@ -7,18 +7,22 @@ import android.media.MediaPlayer;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 
 import java.io.IOException;
 
-public class AudioServiceBinder extends Binder implements MediaPlayer.OnPreparedListener {
+public class AudioServiceBinder extends Binder implements MediaPlayer.OnPreparedListener, MediaPlayer.OnSeekCompleteListener {
     private static final String TAG = AudioServiceBinder.class.getSimpleName();
-    public static final int UPDATE_AUDIO_PROGRESS = 1;
+    public static final int UPDATE_AUDIO_PROGRESS = 101;
+    public static final int PLAY_AUDIO = 102;
 
     private String audioUrl;
     private MediaPlayer mediaPlayer;
     private Context context;
     private Handler progressUpdateHandler;
+    private Thread progressTread;
+    private boolean isPlay;
 
     public Context getMusicContext() {
         return context;
@@ -44,6 +48,22 @@ public class AudioServiceBinder extends Binder implements MediaPlayer.OnPrepared
         this.progressUpdateHandler = progressUpdateHandler;
     }
 
+    public int getTotalAudioDuration(){
+        if(mediaPlayer != null){
+            return mediaPlayer.getDuration();
+        }else{
+            return 0;
+        }
+    }
+
+    public int getAudioProgress(){
+        if(mediaPlayer.getDuration()>0){
+//            return ((mediaPlayer.getCurrentPosition() * 100) / mediaPlayer.getDuration());
+            return mediaPlayer.getCurrentPosition();
+        }
+        return 0;
+    }
+
     private void initMediaPlayer(){
         if(this.mediaPlayer == null){
             mediaPlayer = new MediaPlayer();
@@ -60,6 +80,7 @@ public class AudioServiceBinder extends Binder implements MediaPlayer.OnPrepared
     }
 
     public void setMediaPlayer(Context context, String url){
+        isPlay = false;
         this.context = context;
         if(!url.trim().isEmpty()){
             if(this.audioUrl == null){
@@ -78,6 +99,49 @@ public class AudioServiceBinder extends Binder implements MediaPlayer.OnPrepared
                     startMusic(url);
                 }
             }
+        }
+    }
+
+    private void initThread(){
+        destroyThread();
+        progressTread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (true){
+                    Message msg = new Message();
+                    Message playMsg = new Message();
+                    playMsg.what = PLAY_AUDIO;
+                    msg.what = UPDATE_AUDIO_PROGRESS;
+                    if(mediaPlayer != null){
+                        msg.obj = mediaPlayer.getDuration();
+                    }else{
+                        msg.obj = 0;
+                    }
+                    playMsg.obj = isPlay;
+                    progressUpdateHandler.sendMessage(msg);
+                    progressUpdateHandler.sendMessage(playMsg);
+                    try{
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+    }
+
+    public void seekMedia(int progress){
+        if(mediaPlayer != null){
+            mediaPlayer.seekTo(progress);
+        }
+    }
+
+    public void destroyThread(){
+        if(progressTread != null){
+            if(progressTread.isAlive()){
+                progressTread.interrupt();
+            }
+            progressTread = null;
         }
     }
 
@@ -115,6 +179,15 @@ public class AudioServiceBinder extends Binder implements MediaPlayer.OnPrepared
 
     @Override
     public void onPrepared(MediaPlayer mp) {
+        isPlay = true;
+        initThread();
+        progressTread.start();
         mp.start();
+    }
+
+
+    @Override
+    public void onSeekComplete(MediaPlayer mp) {
+        isPlay = false;
     }
 }

@@ -1,5 +1,7 @@
 package com.hch.hooney.musiccloudproject.listPack;
 
+import android.graphics.drawable.ShapeDrawable;
+import android.graphics.drawable.shapes.OvalShape;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -26,8 +28,8 @@ public class TalkListAdapter extends RecyclerView.Adapter<TalkListAdapter.TalkLi
     }
 
     public void setList(ArrayList<TalKData> list) {
-        list.clear();
-        list.addAll(list);
+        this.list.clear();
+        this.list.addAll(list);
         notifyDataSetChanged();
     }
 
@@ -63,6 +65,8 @@ public class TalkListAdapter extends RecyclerView.Adapter<TalkListAdapter.TalkLi
         public TalkListHolder(@NonNull View itemView) {
             super(itemView);
             userIcon = itemView.findViewById(R.id.item_talk_icon);
+            userIcon.setBackground(new ShapeDrawable(new OvalShape()));
+            userIcon.setClipToOutline(true);
             userMsg = itemView.findViewById(R.id.item_talk_msg);
             talkInfo = itemView.findViewById(R.id.item_talk_info);
         }

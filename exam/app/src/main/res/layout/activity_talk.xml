@@ -22,14 +22,40 @@
 
         <LinearLayout
             android:padding="8dp"
+            android:background="@color/black"
             android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_height="58dp">
-            <EditText
-                android:id="@+id/talk_edit"
+            <LinearLayout
+                android:padding="8dp"
+                android:background="@drawable/shape_edit_talk"
+                android:orientation="horizontal"
                 android:layout_weight="1"
                 android:layout_width="0dp"
-                android:layout_height="match_parent" />
+                android:layout_height="match_parent">
+                <EditText
+                    android:padding="4dp"
+                    android:textColor="@color/white"
+                    android:textStyle="bold"
+                    android:textSize="16sp"
+                    android:hint="Comment at"
+                    android:textColorHint="@color/grey_300"
+                    android:background="@color/alpha"
+                    android:id="@+id/talk_edit"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent" />
+                <TextView
+                    android:id="@+id/item_talk_progress_text"
+                    android:paddingLeft="4dp"
+                    android:gravity="center"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/white"
+                    android:text="0:00"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent" />
+            </LinearLayout>
             <Button
                 android:id="@+id/talk_send_btn"
                 android:backgroundTint="@color/black"

@@ -4,9 +4,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import com.hch.hooney.musiccloudproject.Do.TalKData;
 import com.hch.hooney.musiccloudproject.listPack.TalkListAdapter;
@@ -22,6 +24,7 @@ public class TalkActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private EditText editText;
     private Button sendBtn;
+    private TextView progressText;
 
     private ArrayList<TalKData> list;
     private TalkListAdapter adapter;
@@ -35,7 +38,13 @@ public class TalkActivity extends AppCompatActivity {
     }
 
     private void init() {
+        list = new ArrayList<>();
         adapter = new TalkListAdapter();
+
+        progressText = findViewById(R.id.item_talk_progress_text);
+        if(getIntent().getStringExtra("progress") != null){
+            progressText.setText(getIntent().getStringExtra("progress"));
+        }
 
         recyclerView = findViewById(R.id.talk_recycler);
         recyclerView.setLayoutManager(new LinearLayoutManager(
@@ -53,7 +62,12 @@ public class TalkActivity extends AppCompatActivity {
                     item.setUserId("0001");
                     item.setMsg(editText.getText().toString());
                     item.setCreateDate(getNowDateTime());
-                    adapter.addList(item);
+                    list.add(item);
+
+                    adapter.setList(list);
+
+                    editText.setText("");
+                    recyclerView.scrollToPosition(list.size()-1);
                 }
             }
         });

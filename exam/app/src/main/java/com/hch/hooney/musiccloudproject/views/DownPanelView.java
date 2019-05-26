@@ -31,6 +31,10 @@ public class DownPanelView extends LinearLayout {
         setView(context);
     }
 
+    public ImageButton getPlayBtn(){
+        return playBtn;
+    }
+
     private void setView(Context context) {
         View view = LayoutInflater.from(context).inflate(R.layout.down_music_panel_view, this, false);
         playBtn = view.findViewById(R.id.down_music_panel_play_btn);
